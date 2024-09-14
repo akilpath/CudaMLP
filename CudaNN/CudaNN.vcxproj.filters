@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="FCLayer.cpp">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Tensor2D.cu">
+      <Filter>util</Filter>
+    </CudaCompile>
+    <CudaCompile Include="VectorND.cu">
+      <Filter>util</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ReLu.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FCLayer.hpp">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tensor2D.cuh">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorND.cuh">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="ReLu.cuh">
+      <Filter>layers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="layers">
+      <UniqueIdentifier>{210eece7-5377-4535-907c-64c54280ca75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{c450088a-914e-46de-9978-2fc746f2ce84}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

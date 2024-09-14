@@ -77,10 +77,16 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="FCLayer.cpp" />
+    <CudaCompile Include="ReLu.cu" />
+    <CudaCompile Include="VectorND.cu" />
     <CudaCompile Include="Tensor2D.cu" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FCLayer.hpp" />
+    <ClInclude Include="ReLu.cuh" />
+    <ClInclude Include="VectorND.cuh" />
     <ClInclude Include="Tensor2D.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
