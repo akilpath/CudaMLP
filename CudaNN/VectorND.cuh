@@ -16,7 +16,7 @@ class VectorND {
 		VectorND();
 		~VectorND();
 		int size();
-		void print() const;
+		void print_data() const;
 
 		int scalar_multiply(VectorND &out, float scalar);
 		int vector_add(VectorND& out, VectorND& in);

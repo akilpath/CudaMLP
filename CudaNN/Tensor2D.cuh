@@ -24,6 +24,8 @@ class Tensor2D {
 		int add_vector_to_columns(Tensor2D& out, VectorND& in);
 		int transpose(Tensor2D& out);
 
+		int tensor_element_multiply(Tensor2D& out, Tensor2D& in);
+
 		int mean_rows(VectorND& target);
 
 		int copy(Tensor2D& target);

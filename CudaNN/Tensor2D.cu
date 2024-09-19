@@ -1,20 +1,19 @@
 #include "Tensor2D.cuh"
 
 
-__global__ void _scalar_multiply(float* out, float* data, int max_idx, float scalar) {
+__global__ void _tensor_scalar_multiply(float* out, float* data, int size, float scalar) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int stride = blockDim.x * gridDim.x;
-	while (index < max_idx) {
+	if (index < size) {
 		out[index] = data[index] * scalar;
-		index += stride;
 	}
 }
 
 __global__ void _tensor_add(float* out, float* data_1, float* data_2, int size) {
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (x < size) {
-		out[x] = data_1[x] + data_2[x];
+	if (index < size) {
+		out[index] = data_1[index] + data_2[index];
 	}
 }
 
@@ -57,6 +56,13 @@ __global__ void _tensor_multiply(float* out, float* data_1, int r1, int c1, floa
 		}
 		//printf("acc y: %i, x: %i,  %i\n",y, x, acc);
 		
+	}
+}
+
+__global__ void _tensor_element_multiply(float* out, float* data_1, float* data_2, int size) {
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	if (x < size) {
+		out[x] = data_1[x] * data_2[x];
 	}
 }
 
@@ -138,7 +144,6 @@ void Tensor2D::print_data() {
 		}
 	}
 	printf("]\n");
-	std::cout << std::endl;
 }
 
 int Tensor2D::scalar_multiply(Tensor2D &out, float scalar) {
@@ -151,7 +156,7 @@ int Tensor2D::scalar_multiply(Tensor2D &out, float scalar) {
 	if (num_blocks == 0) {
 		num_blocks = 1;
 	}
-	_scalar_multiply<<<num_blocks, 128>>>(out.data_, data_, total_elements(), scalar);
+	_tensor_scalar_multiply<<<num_blocks, 128>>>(out.data_, data_, total_elements(), scalar);
 	cudaDeviceSynchronize();
 	return 0;
 }
@@ -166,8 +171,32 @@ int Tensor2D::tensor_multiply(Tensor2D &out, Tensor2D &in) {
 	dim3 block_size(3, 3);
 	int num_blocks_y = (int) ceil(((float) out.rows()) / 3);
 	int num_blocks_x = (int) ceil(((float) out.columns()) / 3);
+	if (num_blocks_x == 0) {
+		num_blocks_x = 1;
+	}
+	if (num_blocks_y == 0) {
+		num_blocks_y = 1;
+	}
 	dim3 num_blocks(num_blocks_x, num_blocks_y);
 	_tensor_multiply <<<num_blocks, block_size>>> (out.data_, this->data_, rows_, columns_, in.data_, in.rows(), in.columns());
+	cudaDeviceSynchronize();
+	return 0;
+}
+
+int Tensor2D::tensor_element_multiply(Tensor2D& out, Tensor2D& in) {
+	if (columns_ != in.columns() || rows_ != in.rows()) {
+		std::cout << "Input tensor sizes do not match" << std::endl;
+		return -1;
+	}
+	if (out.columns() != columns_ || out.rows() != rows_) {
+		std::cout << "Output tensor sizes do not match" << std::endl;
+		return -1;
+	}
+	int num_blocks = (int)ceil(total_elements_ / 128.0);
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
+	_tensor_element_multiply << <num_blocks, 128 >> > (out.data_, this->data_, in.data_, total_elements_);
 	cudaDeviceSynchronize();
 	return 0;
 }
@@ -182,6 +211,9 @@ int Tensor2D::tensor_add(Tensor2D &out, Tensor2D& in) {
 		return -1;
 	}
 	int num_blocks = (int) ceil(total_elements_ / 128.0);
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
 	_tensor_add << <num_blocks, 128 >> > (out.data_, this->data_, in.data_, total_elements_);
 	cudaDeviceSynchronize();
 	return 0;
@@ -200,8 +232,14 @@ int Tensor2D::add_vector_to_columns(Tensor2D& out, VectorND& in)
 	}
 	dim3 block_size(8, 8);
 
-	const int num_blocks_x = (int)ceil(((float)out.columns()) / block_size.x);
-	const int num_blocks_y = (int)ceil(((float)out.rows()) / block_size.y);
+	int num_blocks_x = (int)ceil(((float)out.columns()) / block_size.x);
+	if (num_blocks_x == 0) {
+		num_blocks_x = 1;
+	}
+	int num_blocks_y = (int)ceil(((float)out.rows()) / block_size.y);
+	if (num_blocks_y == 0) {
+		num_blocks_y = 1;
+	}
 	dim3 num_blocks(num_blocks_x, num_blocks_y);
 
 	_add_vector_to_columns << <num_blocks, block_size >> > (out.data_, this ->data_, rows_, columns_, in.data_);
@@ -216,8 +254,14 @@ int Tensor2D::transpose(Tensor2D& out) {
 	}
 
 	dim3 block_size(16, 16);
-	const int num_blocks_x = (int)ceil(((float)out.columns()) / block_size.x);
-	const int num_blocks_y = (int)ceil(((float)out.rows()) / block_size.y);
+	int num_blocks_x = (int)ceil(((float)out.columns()) / block_size.x);
+	if (num_blocks_x == 0) {
+		num_blocks_x = 1;
+	}
+	int num_blocks_y = (int)ceil(((float)out.rows()) / block_size.y);
+	if (num_blocks_y == 0) {
+		num_blocks_y = 1;
+	}
 	dim3 num_blocks(num_blocks_x, num_blocks_y);
 	_transpose<< <num_blocks, block_size >> > (out.data_, data_, out.rows(), out.columns());
 	cudaDeviceSynchronize();
@@ -233,6 +277,12 @@ int Tensor2D::copy(Tensor2D& target)
 	dim3 block_size = (16, 16);
 	int num_blocks_x = (int)ceil(((float)columns_) / block_size.x);
 	int num_blocks_y = (int)ceil(((float)rows_) / block_size.y);
+	if (num_blocks_x == 0) {
+		num_blocks_x = 1;
+	}
+	if (num_blocks_y == 0) {
+		num_blocks_y = 1;
+	}
 	dim3 num_blocks(num_blocks_x, num_blocks_y);
 	_copy << <num_blocks, block_size >> > (target.data_, data_, rows_, columns_);
 	cudaDeviceSynchronize();
@@ -244,6 +294,9 @@ int Tensor2D::mean_rows(VectorND& target) {
 		return -1;
 	}
 	int num_blocks = (int)ceil(rows_ / 128.0);
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
 	_mean_rows << <num_blocks, 128 >> > (target.data_, data_, rows_, columns_);
 	cudaDeviceSynchronize();
 	return 0;

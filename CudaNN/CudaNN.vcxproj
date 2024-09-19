@@ -78,14 +78,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="FCLayer.cpp" />
+    <CudaCompile Include="MSE.cu" />
     <CudaCompile Include="ReLu.cu" />
+    <CudaCompile Include="SoftMax.cu" />
     <CudaCompile Include="VectorND.cu" />
     <CudaCompile Include="Tensor2D.cu" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FCLayer.hpp" />
+    <ClInclude Include="MSE.cuh" />
     <ClInclude Include="ReLu.cuh" />
+    <ClInclude Include="SoftMax.cuh" />
     <ClInclude Include="VectorND.cuh" />
     <ClInclude Include="Tensor2D.cuh" />
   </ItemGroup>

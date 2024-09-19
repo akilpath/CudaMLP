@@ -29,12 +29,10 @@ __global__ void _multiply_vector(float* out, float* data_1, float* data_2, int s
 	}
 }
 
-__global__ void _scalar_multiply(float* data, float scalar, int size) {
+__global__ void _vec_scalar_multiply(float* out, float* data, int size, float scalar) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
-	int stride = blockDim.x * gridDim.x;
-	while (index < size) {
-		data[index] = data[index] * scalar;
-		index += stride;
+	if (index < size) {
+		out[index] = data[index] * scalar;
 	}
 }
 
@@ -70,7 +68,7 @@ int VectorND::size(){
 }
 
 
-void VectorND::print() const {
+void VectorND::print_data() const {
 	std::cout << "[";
 	for (int i = 0; i < this->size_; i++) {
 		if (i == this->size_ - 1)
@@ -84,12 +82,15 @@ void VectorND::print() const {
 int VectorND::scalar_multiply(VectorND &out, float scalar)
 {
 	if (out.size() != this->size()) {
-		std::cout << "Error: Output vector size does not match input vector size\n";
+		printf("Error in VectorND::scalar_multiply: Output vector size does not match input vector size\n");
 		return -1;
 	}
 	const int block_size = 128;
 	int num_blocks = (int)ceil(this->size() / block_size);
-	_scalar_multiply << <num_blocks, block_size >> > (this->data_, scalar, this->size());
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
+	_vec_scalar_multiply << <num_blocks, block_size >> > (out.data_, data_, size_, scalar);
 	cudaDeviceSynchronize();
 	return 0;
 }

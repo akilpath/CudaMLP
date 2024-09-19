@@ -14,6 +14,12 @@
     <CudaCompile Include="ReLu.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="SoftMax.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MSE.cu">
+      <Filter>loss</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FCLayer.hpp">
@@ -28,6 +34,12 @@
     <ClInclude Include="ReLu.cuh">
       <Filter>layers</Filter>
     </ClInclude>
+    <ClInclude Include="SoftMax.cuh">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="MSE.cuh">
+      <Filter>loss</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -35,6 +47,9 @@
     </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{c450088a-914e-46de-9978-2fc746f2ce84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loss">
+      <UniqueIdentifier>{c368fddf-5d21-4c98-9fc2-2f451b6095c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
