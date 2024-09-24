@@ -1,4 +1,4 @@
-#include "FCLayer.hpp"
+#include "FCLayer.cuh"
 
 FCLayer::FCLayer() {
 	learning_rate = 0.01;
@@ -21,9 +21,8 @@ FCLayer::FCLayer(int in_size, int out_size, double lr) {
 
 	weights = new Tensor2D(output_size, input_size);
 	bias = new VectorND(output_size);
-	printf("Initializing weights and biases\n");
+
 	init_weights_biases();
-	printf("Weights and biases initialized\n");
 }
 
 FCLayer::~FCLayer() {
@@ -43,11 +42,11 @@ FCLayer::~FCLayer() {
 
 int FCLayer::forward(Tensor2D& out, Tensor2D& in) {
 	if (in.rows() != weights -> columns()) {
-		std::cerr << "Input data size does not match layer input size" << std::endl;
+		printf("FCLayer::forward Input data rows: %d, does not match layer input: %d\n", in.rows(), weights -> columns());
 		return -1;
 	}
 	if (out.rows() != weights -> rows() || out.columns() != in.columns()) {
-		std::cerr << "Output data size does not match layer output size" << std::endl;
+		std::cerr << "FCLayer::forward Output data size does not match layer output size" << std::endl;
 		return -1;
 	}
 
@@ -79,11 +78,11 @@ int FCLayer::forward(Tensor2D& out, Tensor2D& in) {
 
 int FCLayer::backward(Tensor2D &output_error, Tensor2D& input_err) {
 	if (input_err.rows() != weights->rows()) {
-		std::cerr << "Input error size does not match layer input size for backwards pass" << std::endl;
+		std::cerr << "FCLayer::backward Input error size does not match layer input size for backwards pass" << std::endl;
 		return -1;
 	}
 	if (input_data_ == nullptr || output_data_ == nullptr) {
-		std::cerr << "No forward pass has been run before backward pass" << std::endl;
+		std::cerr << "FCLayer::backward No forward pass has been run before backward pass" << std::endl;
 		return -1;
 	}
 
@@ -121,7 +120,7 @@ int FCLayer::backward(Tensor2D &output_error, Tensor2D& input_err) {
 }
 
 void FCLayer::init_weights_biases() {
-	unsigned seed = 32434;
+	unsigned seed = 35713;
 	std::default_random_engine generator(seed);
 	std::normal_distribution<float> distribution(0.0, 1.0);
 
@@ -131,11 +130,11 @@ void FCLayer::init_weights_biases() {
 		}
 	}
 
-	seed = 32422;
+	seed = 322;
 	generator = std::default_random_engine(seed);
 	for (int i = 0; i < bias -> size(); i++) {
 		bias -> data_[i] = distribution(generator);
 	}
-	cudaDeviceSynchronize();
+
 }
 

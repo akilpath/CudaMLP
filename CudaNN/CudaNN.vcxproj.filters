@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="FCLayer.cpp">
+    <CudaCompile Include="main.cpp" />
+    <CudaCompile Include="FCLayer.cu">
       <Filter>layers</Filter>
     </CudaCompile>
     <CudaCompile Include="Tensor2D.cu">
@@ -20,9 +20,15 @@
     <CudaCompile Include="MSE.cu">
       <Filter>loss</Filter>
     </CudaCompile>
+    <CudaCompile Include="MNISTDataset.cpp">
+      <Filter>datasets</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CrossEntropy.cu">
+      <Filter>loss</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FCLayer.hpp">
+    <ClInclude Include="FCLayer.cuh">
       <Filter>layers</Filter>
     </ClInclude>
     <ClInclude Include="Tensor2D.cuh">
@@ -40,6 +46,18 @@
     <ClInclude Include="MSE.cuh">
       <Filter>loss</Filter>
     </ClInclude>
+    <ClInclude Include="XORModel.hpp">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="MNISTDataset.hpp">
+      <Filter>datasets</Filter>
+    </ClInclude>
+    <ClInclude Include="MNISTModel.hpp">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="CrossEntropy.cuh">
+      <Filter>loss</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -51,5 +69,19 @@
     <Filter Include="loss">
       <UniqueIdentifier>{c368fddf-5d21-4c98-9fc2-2f451b6095c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{6c03ce7f-339c-4152-b29a-7c510624279a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="datasets">
+      <UniqueIdentifier>{b7051a3b-f271-4787-a6a4-cf8c77f9ee70}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XORModel.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="MNISTModel.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

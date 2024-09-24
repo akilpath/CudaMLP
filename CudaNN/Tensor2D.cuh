@@ -14,9 +14,10 @@ class Tensor2D {
 		Tensor2D(int rows, int columns);
 		Tensor2D();
 		~Tensor2D();
-		void set_value(int r, int c, float val);
+		void set_value(unsigned int r, unsigned int c, float val);
 		float get_value(int r, int c);
 		void print_data();
+		void print_column(int col);
 		
 		int scalar_multiply(Tensor2D &out, float scalar);
 		int tensor_multiply(Tensor2D &out, Tensor2D &in);
@@ -30,8 +31,8 @@ class Tensor2D {
 
 		int copy(Tensor2D& target);
 
-
-
+		int normalize_tensor(Tensor2D& out, float mean, float std_dev);
+		float tensor_accuracy(Tensor2D& truth);
 		int rows() const;
 		int columns() const;
 		int total_elements() const;

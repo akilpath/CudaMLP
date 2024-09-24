@@ -114,9 +114,47 @@ __global__ void _mean_rows(float* target, float* data, int rows, int columns) {
 	}
 }
 
+__global__ void _normalize(float* target, float* data, int size, float mean, float std_dev) {
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	if (x < size) {
+		target[x] = (data[x] - mean) / std_dev;
+	}
+}
+__global__ void _tensor_accuracy(float *result, float* truth, float* pred, int rows, int columns) {
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+	float max_pred_index = -1;
+	float max = -1;
+
+	float max_truth_index = -1;
+	float max_truth = -1;
+
+	for (int i = 0; i < rows; i++) {
+		float pred_val = pred[i * columns + col];
+		if (pred_val > max) {
+			max = pred_val;
+			max_pred_index = i;
+		}
+
+		float truth_val = truth[i * columns + col];
+		if (truth_val > max_truth) {
+			max_truth = truth_val;
+			max_truth_index = i;
+		}
+	}
+
+	if (max_pred_index == max_truth_index && max_pred_index != -1) {
+		atomicAdd(result, 1);
+	}
+
+}
 
 
-void Tensor2D::set_value(int r, int c, float val){
+
+void Tensor2D::set_value(unsigned int r, unsigned int c, float val){
+	if (r >= rows_ || c >= columns_) {
+		printf("Tensor2D::set_value index out of bounds\n");
+	}
 	data_[r * columns_ + c] = val;
 }
 
@@ -145,6 +183,15 @@ void Tensor2D::print_data() {
 	}
 	printf("]\n");
 }
+
+void Tensor2D::print_column(int col) {
+	printf("[");
+	for (int i = 0; i < rows_; i++) {
+		printf("%.3f, ", data_[i * columns_ + col]);
+	}
+	printf("]\n");
+}
+
 
 int Tensor2D::scalar_multiply(Tensor2D &out, float scalar) {
 	if (out.rows() != rows_ || out.columns() != columns_) {
@@ -300,6 +347,43 @@ int Tensor2D::mean_rows(VectorND& target) {
 	_mean_rows << <num_blocks, 128 >> > (target.data_, data_, rows_, columns_);
 	cudaDeviceSynchronize();
 	return 0;
+}
+
+int Tensor2D::normalize_tensor(Tensor2D& out, float mean, float std_dev) {
+	if (out.rows() != rows_ || out.columns() != columns_) {
+		printf("Tensor2D::normalize_tensor: Output tensor size does not match input tensor size\n");
+		return -1;
+	}
+	int num_blocks = (int)ceil(total_elements_ / 128.0);
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
+	_normalize<< <num_blocks, 128 >> > (out.data_, data_, total_elements_, mean, std_dev);
+	cudaDeviceSynchronize();
+	return 0;
+}
+
+float Tensor2D::tensor_accuracy(Tensor2D& truth) {
+	if (truth.rows() != rows_ || truth.columns() != columns_) {
+		printf("Tensor2D::tensor_accuracy: Truth and prediction tensor sizes do not match\n");
+		return -1;
+	}
+
+	float* d_result;
+	cudaMalloc(&d_result, sizeof(float));
+	cudaMemset(d_result, 0, sizeof(float));
+
+	int num_blocks = (int)ceil(columns_ / 128.0);
+	if (num_blocks == 0) {
+		num_blocks = 1;
+	}
+	_tensor_accuracy << <num_blocks, 128 >> > (d_result, truth.data_, data_, rows_, columns_);
+	cudaDeviceSynchronize();
+
+	float result;
+	cudaMemcpy(&result, d_result, sizeof(float), cudaMemcpyDeviceToHost);
+	cudaFree(d_result);
+	return result / columns_;
 }
 
 int Tensor2D::rows() const

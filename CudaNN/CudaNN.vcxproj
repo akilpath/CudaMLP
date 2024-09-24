@@ -77,21 +77,31 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="FCLayer.cpp" />
+    <CudaCompile Include="CrossEntropy.cu" />
+    <CudaCompile Include="FCLayer.cu" />
+    <CudaCompile Include="MNISTDataset.cpp" />
     <CudaCompile Include="MSE.cu" />
     <CudaCompile Include="ReLu.cu" />
     <CudaCompile Include="SoftMax.cu" />
     <CudaCompile Include="VectorND.cu" />
     <CudaCompile Include="Tensor2D.cu" />
-    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FCLayer.hpp" />
+    <ClInclude Include="CrossEntropy.cuh" />
+    <ClInclude Include="FCLayer.cuh" />
+    <ClInclude Include="MNISTModel.hpp" />
+    <ClInclude Include="MNISTDataset.hpp" />
     <ClInclude Include="MSE.cuh" />
     <ClInclude Include="ReLu.cuh" />
     <ClInclude Include="SoftMax.cuh" />
     <ClInclude Include="VectorND.cuh" />
     <ClInclude Include="Tensor2D.cuh" />
+    <ClInclude Include="XORModel.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MNISTModel.cpp" />
+    <ClCompile Include="XORModel.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

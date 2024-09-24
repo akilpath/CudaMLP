@@ -6,19 +6,24 @@ __global__ void _mse_loss(float* out_err, float* target_data, float* predict_dat
 
 	
 	if (index < columns) {
+
 		float sum = 0;
 		for (int i = 0; i < rows; i++) {
+			//if (index == 4) {
+			//	printf("target: %f, predict: %f\n, row %d col %d", target_data[i * columns + index], predict_data[i * columns + index], i, index);
+			//}
 			sum += pow((target_data[i * columns + index] - predict_data[i * columns + index]), 2);
 		}
 		sum /= columns;
 		atomicAdd(out_err, sum);
+		//printf("loss: %d, %f\n", index, sum);
 	}
 }	
 
 __global__ void _mse_gradients(float* out_err, float* target_data, float* predict_data, int rows, int columns) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < rows * columns) {
-		out_err[index] = 2 * (predict_data[index] - target_data[index]) / rows;
+		out_err[index] = 2 * (predict_data[index] - target_data[index]) / columns;
 	}
 }
 
