@@ -120,32 +120,35 @@ __global__ void _normalize(float* target, float* data, int size, float mean, flo
 		target[x] = (data[x] - mean) / std_dev;
 	}
 }
-__global__ void _tensor_accuracy(float *result, float* truth, float* pred, int rows, int columns) {
+__global__ void _tensor_accuracy(float* result, float* truth, float* pred, int rows, int columns) {
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-	float max_pred_index = -1;
-	float max = -1;
+	if (col < columns) {
+		float max_pred_index = -1;
+		float max = -1;
 
-	float max_truth_index = -1;
-	float max_truth = -1;
+		float max_truth_index = -1;
+		float max_truth = -1;
 
-	for (int i = 0; i < rows; i++) {
-		float pred_val = pred[i * columns + col];
-		if (pred_val > max) {
-			max = pred_val;
-			max_pred_index = i;
+		for (int i = 0; i < rows; i++) {
+			float pred_val = pred[i * columns + col];
+			if (pred_val > max) {
+				max = pred_val;
+				max_pred_index = i;
+			}
+
+			float truth_val = truth[i * columns + col];
+			if (truth_val > max_truth) {
+				max_truth = truth_val;
+				max_truth_index = i;
+			}
 		}
 
-		float truth_val = truth[i * columns + col];
-		if (truth_val > max_truth) {
-			max_truth = truth_val;
-			max_truth_index = i;
+		if (max_pred_index == max_truth_index && max_pred_index != -1) {
+			atomicAdd(result, 1.0);
 		}
 	}
 
-	if (max_pred_index == max_truth_index && max_pred_index != -1) {
-		atomicAdd(result, 1);
-	}
 
 }
 
@@ -210,9 +213,11 @@ int Tensor2D::scalar_multiply(Tensor2D &out, float scalar) {
 
 int Tensor2D::tensor_multiply(Tensor2D &out, Tensor2D &in) {
 	if (this->columns_ != in.rows()) {
+		std::cout << "Tensor2D::tensor_multiply : Input tensor sizes do not match" << std::endl;
 		return -1;
 	}
 	if (out.rows() != this->rows_ || out.columns() != in.columns()) {
+		std::cout << "Tensor2D::tensor_multiply : Output tensor sizes do not match" << std::endl;
 		return -1;
 	}
 	dim3 block_size(3, 3);

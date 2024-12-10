@@ -18,7 +18,7 @@ class FCLayer {
 		Tensor2D* weights;
 		VectorND* bias;
 		int forward(Tensor2D &out, Tensor2D &input_data);
-		int backward(Tensor2D & output_err, Tensor2D &input_err);
+		int backward(Tensor2D & output_err, Tensor2D &input_err, bool debug=false);
 
 		void init_weights_biases();
 	private:

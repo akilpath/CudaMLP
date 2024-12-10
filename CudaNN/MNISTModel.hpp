@@ -19,7 +19,6 @@ private:
 	FCLayer* input_layer;
 	ReLu* relu_1;
 	FCLayer* hidden_layer;
-	ReLu* relu_2;
 	SoftMax* softmax;
 
 	MSE* mse;

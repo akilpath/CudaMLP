@@ -14,7 +14,7 @@ __global__ void _mse_loss(float* out_err, float* target_data, float* predict_dat
 			//}
 			sum += pow((target_data[i * columns + index] - predict_data[i * columns + index]), 2);
 		}
-		sum /= columns;
+		sum /= rows;
 		atomicAdd(out_err, sum);
 		//printf("loss: %d, %f\n", index, sum);
 	}
@@ -23,7 +23,7 @@ __global__ void _mse_loss(float* out_err, float* target_data, float* predict_dat
 __global__ void _mse_gradients(float* out_err, float* target_data, float* predict_data, int rows, int columns) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < rows * columns) {
-		out_err[index] = 2 * (predict_data[index] - target_data[index]) / columns;
+		out_err[index] = 2 * (predict_data[index] - target_data[index]) / rows;
 	}
 }
 
@@ -35,7 +35,10 @@ float MSE::calculate_loss(Tensor2D& target, Tensor2D& prediction)
 		return -1;
 	}
 	float* d_loss; // loss variable on gpu
-	cudaMalloc(&d_loss, sizeof(float));
+
+	if (cudaMalloc(&d_loss, sizeof(float)) != cudaError_t::cudaSuccess) {
+		std::cout << "MSE::calculate_loss : Failed to allocate memory using cudamalloc " << std::endl;
+	};
 
 	int block_size = 128;
 	int num_blocks = ceil(((float)target.columns()) / block_size);
@@ -45,7 +48,7 @@ float MSE::calculate_loss(Tensor2D& target, Tensor2D& prediction)
 	float loss;
 	cudaMemcpy(&loss, d_loss, sizeof(float), cudaMemcpyDeviceToHost);
 	cudaFree(d_loss);
-	return loss;
+	return loss / target.columns();
 }
 
 

@@ -32,7 +32,7 @@ float CrossEntropy::calculate_loss(Tensor2D& truth, Tensor2D& prediction) {
 	}
 	cudaMalloc(&d_out, sizeof(float));
 	cudaMemset(d_out, 0, sizeof(float));
-	cross_entropy_loss_kernel << <num_blocks, target.get_columns() >> > (d_out, prediction.get_data(), truth.get_data(), target.get_rows(), target.get_columns());
+	cross_entropy_loss_kernel << <num_blocks, num_threads >> > (d_out, prediction.data_, truth.data_, truth.rows(), truth.columns());
 	float out;
 	cudaMemcpy(&out, d_out, sizeof(float), cudaMemcpyDeviceToHost);
 	cudaFree(d_out);

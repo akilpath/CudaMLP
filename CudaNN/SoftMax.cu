@@ -16,7 +16,7 @@ __global__ void _softmax(float* out, float* in, int rows, int columns) {
 			//if (index == 4) {
 			//	printf("index: %d, sum: %f, exp: %f\n", index, sum, exp(in[i * columns + index] - max));
 			//}
-			sum += exp(in[i * columns + index] - max);
+			sum += exp(in[i * columns + index] - max); // keep exponents small to avoid overflow
 		}
 
 		for (int i = 0; i < rows; i++) {

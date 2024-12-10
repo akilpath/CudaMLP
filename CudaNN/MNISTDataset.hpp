@@ -22,8 +22,17 @@ class MNISTDataset {
 		std::vector<std::vector<float>> training_images;
 		std::vector<std::vector<float>> test_images;
 
-		void load_dataset(std::string training_fpath, std::string test_fpath);
+		std::vector<Tensor2D*> training_data;
+		std::vector<Tensor2D*> training_labels;
 
+		std::vector<Tensor2D*> test_data;
+		std::vector<Tensor2D*> test_labels;
+
+
+		void load_dataset(std::string training_fpath, std::string test_fpath, int training_count, int test_count);
+
+		void batchify(int batch_size);
+		void clear_old_data();
 		void shuffle_dataset();
 
 		void get_training_batch(Tensor2D* &data, Tensor2D* &labels, unsigned int batch_size, unsigned int batch_index);
