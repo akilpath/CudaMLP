@@ -43,7 +43,6 @@ __global__ void _tensor_multiply(float* out, float* data_1, int r1, int c1, floa
 		if (x < output_columns && y < output_rows) {
 			for (int i = 0; i < blockDim.x; i++) {
 				if (i + k < c1) {
-					//printf("deez");
 					//if (x == 0 && y == 0) {
 					//	printf("data1: %.2f, data2: %.2f\n", data_1s[threadIdx.y * blockDim.x + i], data_2s[(i * blockDim.x) + threadIdx.x]);
 					//}
